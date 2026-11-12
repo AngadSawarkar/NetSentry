@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+{% block title %}Security Alerts{% endblock %}
+{% block page_title %}Security Alerts{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1><i class="bi bi-shield-exclamation text-orange" style="font-size:1.1rem"></i> Security Alerts</h1>
+  <p class="page-subtitle">Detection events raised by NetSentry IDS. These indicate suspicious activity – not confirmed attacks.</p>
+</div>
+
+<!-- Alert stat cards -->
+<div class="row mb-3" id="alert-stat-cards">
+  <div class="col-6 col-md-4 col-xl-2">
+    <div class="stat-card" style="--card-accent:var(--accent-orange)">
+      <div class="stat-icon orange"><i class="bi bi-shield-exclamation"></i></div>
+      <div class="stat-info"><div class="stat-value" id="alert-total">—</div><div class="stat-label">Total Alerts</div></div>
+    </div>
+  </div>
+  <div class="col-6 col-md-4 col-xl-2">
+    <div class="stat-card" style="--card-accent:var(--accent-red)">
+      <div class="stat-icon red"><i class="bi bi-exclamation-octagon-fill"></i></div>
+      <div class="stat-info"><div class="stat-value" id="alert-critical">—</div><div class="stat-label">Critical</div></div>
+    </div>
+  </div>
+  <div class="col-6 col-md-4 col-xl-2">
+    <div class="stat-card" style="--card-accent:var(--accent-orange)">
+      <div class="stat-icon orange"><i class="bi bi-exclamation-triangle-fill"></i></div>
+      <div class="stat-info"><div class="stat-value" id="alert-high">—</div><div class="stat-label">High</div></div>
+    </div>
+  </div>
+  <div class="col-6 col-md-4 col-xl-2">
+    <div class="stat-card" style="--card-accent:var(--accent-blue)">
+      <div class="stat-icon blue"><i class="bi bi-info-circle-fill"></i></div>
+      <div class="stat-info"><div class="stat-value" id="alert-medium">—</div><div class="stat-label">Medium</div></div>
+    </div>
+  </div>
+  <div class="col-6 col-md-4 col-xl-2">
+    <div class="stat-card" style="--card-accent:var(--accent-green)">
+      <div class="stat-icon green"><i class="bi bi-check-circle-fill"></i></div>
+      <div class="stat-info"><div class="stat-value" id="alert-low">—</div><div class="stat-label">Low / Info</div></div>
+    </div>
+  </div>
+</div>
+
+<div class="section-card">
+  <div class="section-card-header">
+    <span class="section-card-title"><i class="bi bi-shield-exclamation"></i> Alert Records</span>
+  </div>
+  <div class="section-card-body" style="padding-bottom:0">
+    <div class="filter-row">
+      <input type="text" class="ns-input search-input" id="alert-search" placeholder="Search IP, type, description…">
+      <select class="ns-select" id="alert-sev-filter" style="width:130px">
+        <option value="">All Severities</option>
+        <option value="CRITICAL">Critical</option>
+        <option value="HIGH">High</option>
+        <option value="MEDIUM">Medium</option>
+        <option value="LOW">Low</option>
+      </select>
+      <select class="ns-select" id="alert-type-filter" style="width:170px">
+        <option value="">All Types</option>
+        <option value="PORT_SCAN">Port Scan</option>
+        <option value="SYN_FLOOD">SYN Flood</option>
+        <option value="ICMP_FLOOD">ICMP Flood</option>
+        <option value="REPEATED_CONNECTIONS">Repeated Connections</option>
+        <option value="DNS_FLOOD">DNS Flood</option>
+        <option value="REPEATED_DNS">Repeated DNS</option>
+      </select>
+      <button class="btn-ns btn-ns-outline" onclick="applyAlertFilters()"><i class="bi bi-funnel"></i> Filter</button>
+    </div>
+  </div>
+
+  <div class="ns-table-wrapper">
+    <table class="ns-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Type</th>
+          <th>Source IP</th>
+          <th>Destination IP</th>
+          <th>Severity</th>
+          <th>Description</th>
+          <th>Timestamp</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="alert-table-body">
+        <tr><td colspan="8"><div class="loading-overlay"><div class="spinner"></div> Loading…</div></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="ns-pagination">
+    <span class="pagination-info" id="alert-page-info"></span>
+    <div class="pagination-controls" id="alert-page-controls"></div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/alerts.js') }}"></script>
+{% endblock %}

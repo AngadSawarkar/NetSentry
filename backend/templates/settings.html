@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+{% block title %}Settings{% endblock %}
+{% block page_title %}Settings{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1><i class="bi bi-gear-fill text-blue" style="font-size:1.1rem"></i> Settings</h1>
+  <p class="page-subtitle">System configuration and monitoring status. Settings marked <span class="readonly-badge">READ-ONLY</span> are sourced from <code>config.py</code> or the database and cannot be changed from this interface.</p>
+</div>
+
+<!-- System Status -->
+<div class="section-card mb-3">
+  <div class="section-card-header">
+    <span class="section-card-title"><i class="bi bi-heart-pulse-fill"></i> System Status</span>
+    <button class="btn-ns btn-ns-outline btn-ns-sm" onclick="refreshSettings()"><i class="bi bi-arrow-clockwise"></i> Refresh</button>
+  </div>
+  <div class="section-card-body">
+    <div class="settings-row">
+      <div class="settings-row-info"><div class="settings-row-label">Backend API Status</div><div class="settings-row-desc">Flask REST API server</div></div>
+      <div class="settings-row-control"><span id="set-backend-status">—</span></div>
+    </div>
+    <div class="settings-row">
+      <div class="settings-row-info"><div class="settings-row-label">Sensor Status</div><div class="settings-row-desc">Packet capture sensor (packet_sensor.py)</div></div>
+      <div class="settings-row-control"><span id="set-sensor-status">—</span></div>
+    </div>
+    <div class="settings-row">
+      <div class="settings-row-info"><div class="settings-row-label">Monitoring Interface</div><div class="settings-row-desc">Network interface being monitored</div></div>
+      <div class="settings-row-control"><code class="font-mono" id="set-iface">—</code> <span class="readonly-badge">READ-ONLY</span></div>
+    </div>
+    <div class="settings-row">
+      <div class="settings-row-info"><div class="settings-row-label">Last Sensor Heartbeat</div><div class="settings-row-desc">Most recent heartbeat received from sensor</div></div>
+      <div class="settings-row-control"><span id="set-heartbeat">—</span></div>
+    </div>
+    <div class="settings-row">
+      <div class="settings-row-info"><div class="settings-row-label">Database Connection</div></div>
+      <div class="settings-row-control"><span id="set-db-status">—</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- Monitoring Configuration -->
+<div class="section-card mb-3">
+  <div class="section-card-header">
+    <span class="section-card-title"><i class="bi bi-ethernet"></i> Monitoring Configuration</span>
+    <span class="readonly-badge">READ-ONLY</span>
+  </div>
+  <div class="section-card-body">
+    <div class="settings-row">
+      <div class="settings-row-info"><div class="settings-row-label">Network Interface</div><div class="settings-row-desc">NETSENTRY_INTERFACE env variable</div></div>
+      <div class="settings-row-control"><code id="conf-iface">—</code></div>
+    </div>
+    <div class="settings-row">
+      <div class="settings-row-info"><div class="settings-row-label">Monitored IP</div><div class="settings-row-desc">NETSENTRY_MONITORED_IP env variable</div></div>
+      <div class="settings-row-control"><code id="conf-ip">—</code></div>
+    </div>
+    <div class="settings-row">
+      <div class="settings-row-info"><div class="settings-row-label">Capture Filter</div><div class="settings-row-desc">BPF filter applied to packet capture</div></div>
+      <div class="settings-row-control"><code id="conf-filter" style="font-size:.78rem;word-break:break-all">—</code></div>
+    </div>
+    <div class="settings-row">
+      <div class="settings-row-info"><div class="settings-row-label">Heartbeat Interval</div><div class="settings-row-desc">How often the sensor sends a heartbeat</div></div>
+      <div class="settings-row-control"><span id="conf-hb-interval">—</span> seconds</div>
+    </div>
+    <div class="settings-row">
+      <div class="settings-row-info"><div class="settings-row-label">Heartbeat Timeout</div><div class="settings-row-desc">Backend marks sensor OFFLINE after this period with no heartbeat</div></div>
+      <div class="settings-row-control"><span id="conf-hb-timeout">—</span> seconds</div>
+    </div>
+  </div>
+</div>
+
+<!-- Detection Thresholds -->
+<div class="section-card mb-3">
+  <div class="section-card-header">
+    <span class="section-card-title"><i class="bi bi-funnel-fill"></i> Detection Thresholds</span>
+    <span class="readonly-badge">READ-ONLY</span>
+  </div>
+  <div class="section-card-body">
+    <p class="text-secondary text-sm mb-0" style="margin-bottom:12px">To change thresholds, edit <code>config.py</code> or set the corresponding environment variable and restart the sensor.</p>
+    <div id="threshold-list">
+      <div class="loading-overlay"><div class="spinner"></div> Loading…</div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+async function refreshSettings() {
+  try {
+    const res = await fetch('/api/status');
+    const d = await res.json();
+
+    const bOnline = d.backend === 'ONLINE';
+    const sOnline = d.sensor  === 'ONLINE';
+
+    document.getElementById('set-backend-status').innerHTML = statusPill(bOnline);
+    document.getElementById('set-sensor-status').innerHTML  = statusPill(sOnline);
+    document.getElementById('set-iface').textContent     = d.interface     || '—';
+    document.getElementById('set-heartbeat').textContent = formatTs(d.last_heartbeat);
+    document.getElementById('set-db-status').innerHTML   = '<span class="status-pill online"><span class="status-dot online"></span>Connected</span>';
+  } catch {
+    document.getElementById('set-db-status').innerHTML = '<span class="status-pill offline">Unknown</span>';
+  }
+
+  // Load config from /api/rules (which also returns config values)
+  try {
+    const res2 = await fetch('/api/rules');
+    const d2 = await res2.json();
+    const cfg = d2.config || {};
+
+    document.getElementById('conf-iface').textContent      = cfg.interface         || '—';
+    document.getElementById('conf-ip').textContent         = cfg.monitored_ip      || '—';
+    document.getElementById('conf-filter').textContent     = cfg.capture_filter    || '—';
+    document.getElementById('conf-hb-interval').textContent = cfg.heartbeat_interval || '—';
+    document.getElementById('conf-hb-timeout').textContent  = cfg.heartbeat_timeout  || '—';
+
+    const rules = d2.rules || [];
+    const list  = document.getElementById('threshold-list');
+    list.innerHTML = rules.map(r => `
+      <div class="settings-row">
+        <div class="settings-row-info">
+          <div class="settings-row-label">${escHtml(r.name)}</div>
+          <div class="settings-row-desc">${escHtml(r.description)}</div>
+        </div>
+        <div class="settings-row-control" style="text-align:right">
+          <div style="font-size:.8rem;color:var(--text-secondary)">Threshold: <strong class="text-primary">${escHtml(String(r.threshold))}</strong></div>
+          <div style="font-size:.8rem;color:var(--text-secondary)">Window: <strong class="text-primary">${escHtml(String(r.window))}s</strong></div>
+        </div>
+      </div>
+    `).join('');
+  } catch {}
+}
+
+document.addEventListener('DOMContentLoaded', refreshSettings);
+</script>
+{% endblock %}

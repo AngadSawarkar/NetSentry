@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% block title %}Incident History{% endblock %}
+{% block page_title %}Incident History{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1><i class="bi bi-clock-history text-blue" style="font-size:1.1rem"></i> Incident History</h1>
+  <p class="page-subtitle">Review historical security alerts with status tracking. Status is stored locally in your browser for this session.</p>
+</div>
+
+<div class="section-card mb-3" style="border-left:3px solid var(--accent-blue)">
+  <div class="section-card-body" style="padding:12px 18px">
+    <div class="d-flex align-center gap-8">
+      <i class="bi bi-info-circle text-blue"></i>
+      <span class="text-sm text-secondary">
+        Incident status (New / Investigating / Resolved / False Positive) is tracked in your browser's local storage.
+        A future database schema extension will enable persistent server-side status management.
+      </span>
+    </div>
+  </div>
+</div>
+
+<!-- Filters -->
+<div class="section-card">
+  <div class="section-card-header">
+    <span class="section-card-title"><i class="bi bi-clock-history"></i> Incidents (<span id="incident-count">—</span>)</span>
+  </div>
+  <div class="section-card-body" style="padding-bottom:0">
+    <div class="filter-row">
+      <input type="text" class="ns-input search-input" id="inc-search" placeholder="Search IP, type…">
+      <select class="ns-select" id="inc-sev-filter" style="width:130px">
+        <option value="">All Severities</option>
+        <option value="CRITICAL">Critical</option>
+        <option value="HIGH">High</option>
+        <option value="MEDIUM">Medium</option>
+        <option value="LOW">Low</option>
+      </select>
+      <select class="ns-select" id="inc-status-filter" style="width:150px">
+        <option value="">All Statuses</option>
+        <option value="NEW">New</option>
+        <option value="INVESTIGATING">Investigating</option>
+        <option value="RESOLVED">Resolved</option>
+        <option value="FALSE_POSITIVE">False Positive</option>
+      </select>
+      <input type="date" class="ns-input" id="inc-date-from" style="width:150px">
+      <input type="date" class="ns-input" id="inc-date-to"   style="width:150px">
+      <button class="btn-ns btn-ns-outline" onclick="applyIncFilters()"><i class="bi bi-funnel"></i> Filter</button>
+    </div>
+  </div>
+
+  <div class="ns-table-wrapper">
+    <table class="ns-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Type</th>
+          <th>Source IP</th>
+          <th>Severity</th>
+          <th>Status</th>
+          <th>Timestamp</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="incident-table-body">
+        <tr><td colspan="7"><div class="loading-overlay"><div class="spinner"></div> Loading…</div></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="ns-pagination">
+    <span class="pagination-info" id="inc-page-info"></span>
+    <div class="pagination-controls" id="inc-page-controls"></div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/incidents.js') }}"></script>
+{% endblock %}

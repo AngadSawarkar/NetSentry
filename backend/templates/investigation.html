@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+{% block title %}Investigation{% endblock %}
+{% block page_title %}IP &amp; Domain Investigation{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1><i class="bi bi-search text-blue" style="font-size:1.1rem"></i> Investigation</h1>
+  <p class="page-subtitle">Search NetSentry's historical observations for a specific IP address or domain name.</p>
+</div>
+
+<!-- Hero search -->
+<div class="investigation-hero">
+  <h2><i class="bi bi-search"></i> Investigate an IP or Domain</h2>
+  <p>Enter an IPv4 address or domain name to view all recorded network observations.<br>
+  Results are based solely on data collected by the NetSentry sensor.</p>
+  <div class="investigation-search-wrap">
+    <input type="text" id="inv-query" placeholder="e.g. 192.168.56.104 or example.com"
+           value="{{ query|e if query else '' }}" autocomplete="off">
+    <button onclick="runInvestigation()"><i class="bi bi-search"></i> Investigate</button>
+  </div>
+  <p class="text-muted text-xs mt-2">
+    <i class="bi bi-info-circle"></i>
+    Domain investigation is based on observed DNS queries only. HTTPS content is never inspected.
+  </p>
+</div>
+
+<!-- Results area -->
+<div id="inv-results" style="display:none">
+
+  <div class="row mb-3">
+    <div class="col-12">
+      <div class="section-card" id="inv-summary-card">
+        <div class="section-card-header">
+          <span class="section-card-title"><i class="bi bi-info-circle"></i> <span id="inv-summary-title">Summary</span></span>
+          <span class="text-muted text-xs" id="inv-type-badge"></span>
+        </div>
+        <div class="section-card-body">
+          <div class="row" id="inv-summary-row"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row mb-3">
+    <div class="col-12 col-lg-6">
+      <div class="section-card">
+        <div class="section-card-header">
+          <span class="section-card-title"><i class="bi bi-diagram-3-fill"></i> Related Connections</span>
+        </div>
+        <div class="ns-table-wrapper">
+          <table class="ns-table">
+            <thead><tr><th>Src IP</th><th>Dst IP</th><th>Proto</th><th>Ports</th><th>Packets</th><th>Last Seen</th></tr></thead>
+            <tbody id="inv-conn-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <div class="col-12 col-lg-6">
+      <div class="section-card">
+        <div class="section-card-header">
+          <span class="section-card-title"><i class="bi bi-shield-exclamation"></i> Related Alerts</span>
+        </div>
+        <div class="ns-table-wrapper">
+          <table class="ns-table">
+            <thead><tr><th>Type</th><th>Severity</th><th>Description</th><th>Time</th></tr></thead>
+            <tbody id="inv-alert-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div id="inv-loading" style="display:none">
+  <div class="loading-overlay" style="padding:60px"><div class="spinner"></div> Searching…</div>
+</div>
+
+<div id="inv-empty" style="display:none">
+  <div class="section-card">
+    <div class="section-card-body">
+      <div class="empty-state">
+        <i class="bi bi-search"></i>
+        <h3>No Results Found</h3>
+        <p id="inv-empty-msg">No observations recorded for this query.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/investigation.js') }}"></script>
+{% endblock %}

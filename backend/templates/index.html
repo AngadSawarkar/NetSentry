@@ -1,0 +1,182 @@
+{% extends "base.html" %}
+{% block title %}Overview Dashboard{% endblock %}
+{% block page_title %}Overview Dashboard{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1><i class="bi bi-grid-1x2-fill text-blue" style="font-size:1.1rem"></i> Overview</h1>
+  <p class="page-subtitle">Network monitoring summary – real-time and historical data from NetSentry sensors.</p>
+</div>
+
+<!-- Summary Cards -->
+<div class="row mb-3" id="summary-cards">
+  <div class="col-6 col-md-4 col-xl-2">
+    <div class="stat-card" style="--card-accent:var(--accent-blue)">
+      <div class="stat-icon blue"><i class="bi bi-hdd-network-fill"></i></div>
+      <div class="stat-info">
+        <div class="stat-value" id="card-devices">—</div>
+        <div class="stat-label">Total Devices</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 col-md-4 col-xl-2">
+    <div class="stat-card" style="--card-accent:var(--accent-cyan)">
+      <div class="stat-icon cyan"><i class="bi bi-diagram-3-fill"></i></div>
+      <div class="stat-info">
+        <div class="stat-value" id="card-connections">—</div>
+        <div class="stat-label">Connections</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 col-md-4 col-xl-2">
+    <div class="stat-card" style="--card-accent:var(--accent-orange)">
+      <div class="stat-icon orange"><i class="bi bi-shield-exclamation"></i></div>
+      <div class="stat-info">
+        <div class="stat-value" id="card-alerts">—</div>
+        <div class="stat-label">Total Alerts</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 col-md-4 col-xl-2">
+    <div class="stat-card" style="--card-accent:var(--accent-red)">
+      <div class="stat-icon red"><i class="bi bi-shield-fill-x"></i></div>
+      <div class="stat-info">
+        <div class="stat-value" id="card-critical">—</div>
+        <div class="stat-label">Critical / High</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 col-md-4 col-xl-2">
+    <div class="stat-card" style="--card-accent:var(--accent-green)">
+      <div class="stat-icon green"><i class="bi bi-clipboard-data-fill"></i></div>
+      <div class="stat-info">
+        <div class="stat-value" id="card-packets">—</div>
+        <div class="stat-label">Total Packets</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 col-md-4 col-xl-2">
+    <div class="stat-card" style="--card-accent:var(--accent-purple)">
+      <div class="stat-icon purple"><i class="bi bi-database-fill"></i></div>
+      <div class="stat-info">
+        <div class="stat-value" id="card-bytes">—</div>
+        <div class="stat-label">Traffic Volume</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Charts Row -->
+<div class="row mb-3">
+  <div class="col-12 col-lg-8">
+    <div class="section-card">
+      <div class="section-card-header">
+        <span class="section-card-title"><i class="bi bi-activity"></i> Network Traffic Over Time</span>
+        <small class="text-muted">Last 20 recorded snapshots</small>
+      </div>
+      <div class="section-card-body">
+        <div class="chart-container" style="height:220px">
+          <canvas id="trafficChart"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-12 col-lg-4">
+    <div class="section-card">
+      <div class="section-card-header">
+        <span class="section-card-title"><i class="bi bi-pie-chart-fill"></i> Protocol Distribution</span>
+      </div>
+      <div class="section-card-body">
+        <div class="chart-container" style="height:220px">
+          <canvas id="protoChart"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Recent Alerts + Recent Devices Row -->
+<div class="row mb-3">
+  <div class="col-12 col-lg-7">
+    <div class="section-card">
+      <div class="section-card-header">
+        <span class="section-card-title"><i class="bi bi-shield-exclamation"></i> Recent Security Alerts</span>
+        <a href="/alerts" class="btn-ns btn-ns-outline btn-ns-sm">View All</a>
+      </div>
+      <div class="ns-table-wrapper">
+        <table class="ns-table">
+          <thead>
+            <tr>
+              <th>Type</th>
+              <th>Source IP</th>
+              <th>Destination IP</th>
+              <th>Severity</th>
+              <th>Time</th>
+            </tr>
+          </thead>
+          <tbody id="recent-alerts-body">
+            <tr><td colspan="5"><div class="loading-overlay"><div class="spinner"></div> Loading…</div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <div class="col-12 col-lg-5">
+    <div class="section-card">
+      <div class="section-card-header">
+        <span class="section-card-title"><i class="bi bi-hdd-network-fill"></i> Recently Discovered Devices</span>
+        <a href="/devices" class="btn-ns btn-ns-outline btn-ns-sm">View All</a>
+      </div>
+      <div class="ns-table-wrapper">
+        <table class="ns-table">
+          <thead>
+            <tr>
+              <th>IP Address</th>
+              <th>MAC Address</th>
+              <th>Packets</th>
+              <th>Last Seen</th>
+            </tr>
+          </thead>
+          <tbody id="recent-devices-body">
+            <tr><td colspan="4"><div class="loading-overlay"><div class="spinner"></div> Loading…</div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Network Health -->
+<div class="row">
+  <div class="col-12 col-md-6 col-lg-4">
+    <div class="section-card">
+      <div class="section-card-header">
+        <span class="section-card-title"><i class="bi bi-heart-pulse-fill"></i> Network Health</span>
+      </div>
+      <div class="section-card-body">
+        <div class="health-item">
+          <span class="health-label"><i class="bi bi-cloud-fill"></i> Backend Status</span>
+          <span class="health-value" id="health-backend">—</span>
+        </div>
+        <div class="health-item">
+          <span class="health-label"><i class="bi bi-cpu-fill"></i> Sensor Status</span>
+          <span class="health-value" id="health-sensor">—</span>
+        </div>
+        <div class="health-item">
+          <span class="health-label"><i class="bi bi-ethernet"></i> Interface</span>
+          <span class="health-value font-mono" id="health-iface">—</span>
+        </div>
+        <div class="health-item">
+          <span class="health-label"><i class="bi bi-clock-fill"></i> Last Heartbeat</span>
+          <span class="health-value" id="health-heartbeat">—</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+{% endblock %}

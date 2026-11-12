@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% block title %}Detection Rules{% endblock %}
+{% block page_title %}Detection Rules{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1><i class="bi bi-funnel-fill text-blue" style="font-size:1.1rem"></i> Detection Rules</h1>
+  <p class="page-subtitle">Active IDS detection rules configured in the NetSentry sensor. Thresholds are read from <code>config.py</code> and environment variables.</p>
+</div>
+
+<div class="section-card mb-3" style="border-left:3px solid var(--accent-orange)">
+  <div class="section-card-body" style="padding:12px 18px">
+    <div class="d-flex align-center gap-8">
+      <i class="bi bi-lock-fill text-orange"></i>
+      <span class="text-sm text-secondary">These rules are <strong>read-only</strong>. To change thresholds, edit <code>config.py</code> or the corresponding environment variables and restart the sensor. Future versions may support live threshold updates.</span>
+    </div>
+  </div>
+</div>
+
+<div id="rules-container">
+  <div class="loading-overlay"><div class="spinner"></div> Loading rules…</div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', async () => {
+  const container = document.getElementById('rules-container');
+  try {
+    const res = await fetch('/api/rules');
+    if (!res.ok) throw new Error('API error');
+    const d = await res.json();
+    const rules = d.rules || [];
+
+    if (!rules.length) {
+      container.innerHTML = '<div class="empty-state"><i class="bi bi-funnel"></i><h3>No Rules</h3><p>No detection rules available.</p></div>';
+      return;
+    }
+
+    const icons = {
+      PORT_SCAN:'bi-crosshair', SYN_FLOOD:'bi-lightning-fill',
+      ICMP_FLOOD:'bi-broadcast', REPEATED_CONNECTIONS:'bi-arrow-repeat',
+      DNS_FLOOD:'bi-globe', REPEATED_DNS:'bi-journals'
+    };
+
+    container.innerHTML = rules.map(r => `
+      <div class="rule-card">
+        <div class="rule-card-header">
+          <span class="rule-name">
+            <i class="bi ${icons[r.id]||'bi-shield-fill'}"></i>
+            ${escHtml(r.name)}
+          </span>
+          <span class="${r.enabled?'rule-enabled':'rule-disabled'} d-flex align-center gap-8 text-sm fw-600">
+            <i class="bi ${r.enabled?'bi-check-circle-fill':'bi-x-circle-fill'}"></i>
+            ${r.enabled?'Enabled':'Disabled'}
+          </span>
+        </div>
+        <div class="rule-desc">${escHtml(r.description)}</div>
+        <div class="rule-params">
+          <div class="rule-param">
+            <span class="rule-param-label">Threshold: </span>
+            <span class="rule-param-value">${escHtml(String(r.threshold))}</span>
+          </div>
+          <div class="rule-param">
+            <span class="rule-param-label">Time Window: </span>
+            <span class="rule-param-value">${escHtml(String(r.window))} seconds</span>
+          </div>
+          <div class="rule-param">
+            <span class="rule-param-label">Config Key: </span>
+            <span class="rule-param-value font-mono text-xs text-muted">${escHtml(r.config_key||'—')}</span>
+          </div>
+        </div>
+      </div>
+    `).join('');
+
+  } catch (e) {
+    container.innerHTML = '<div class="empty-state"><i class="bi bi-exclamation-triangle"></i><h3>Load Error</h3><p>Could not load detection rules.</p></div>';
+  }
+});
+</script>
+{% endblock %}

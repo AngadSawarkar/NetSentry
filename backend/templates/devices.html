@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block title %}Devices{% endblock %}
+{% block page_title %}Device Inventory{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1><i class="bi bi-hdd-network-fill text-blue" style="font-size:1.1rem"></i> Device Inventory</h1>
+  <p class="page-subtitle">All network devices discovered by the sensor. A device is considered <strong>online</strong> if it was last seen within 15 minutes.</p>
+</div>
+
+<!-- Filters -->
+<div class="section-card">
+  <div class="section-card-header">
+    <span class="section-card-title"><i class="bi bi-hdd-network-fill"></i> Devices (<span id="dev-count">—</span>)</span>
+    <div class="section-card-actions">
+      <label class="text-sm text-secondary d-flex align-center gap-8" style="cursor:pointer">
+        <input type="checkbox" id="filter-recent-only"> Recent only (15 min)
+      </label>
+    </div>
+  </div>
+  <div class="section-card-body" style="padding-bottom:0">
+    <div class="filter-row">
+      <input type="text" class="ns-input search-input" id="dev-search" placeholder="Search by IP or MAC address…">
+      <select class="ns-select" id="dev-sort" style="width:160px">
+        <option value="last_seen_desc">Latest First</option>
+        <option value="packets_desc">Most Packets</option>
+        <option value="bytes_desc">Most Bytes</option>
+        <option value="first_seen_asc">Oldest First</option>
+      </select>
+      <button class="btn-ns btn-ns-outline" onclick="applyDevFilters()"><i class="bi bi-funnel"></i> Filter</button>
+    </div>
+  </div>
+
+  <div class="ns-table-wrapper">
+    <table class="ns-table">
+      <thead>
+        <tr>
+          <th>Status</th>
+          <th>IP Address</th>
+          <th>MAC Address</th>
+          <th>First Seen</th>
+          <th>Last Seen</th>
+          <th>Packets</th>
+          <th>Bytes</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="dev-table-body">
+        <tr><td colspan="8"><div class="loading-overlay"><div class="spinner"></div> Loading…</div></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="ns-pagination">
+    <span class="pagination-info" id="dev-page-info"></span>
+    <div class="pagination-controls" id="dev-page-controls"></div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/devices.js') }}"></script>
+{% endblock %}

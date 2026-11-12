@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}NetSentry{% endblock %} – Network Monitoring &amp; IDS</title>
+
+  <!-- Bootstrap 5 CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
+        crossorigin="anonymous">
+  <!-- Bootstrap Icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <!-- Inter font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+
+  <!-- NetSentry CSS -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  {% block extra_head %}{% endblock %}
+</head>
+<body>
+
+<div id="app-wrapper">
+
+  <!-- ===== SIDEBAR ===== -->
+  <nav id="sidebar">
+
+    <!-- Brand -->
+    <div class="sidebar-brand">
+      <div class="sidebar-brand-icon"><i class="bi bi-shield-shaded"></i></div>
+      <div class="sidebar-brand-text">
+        <span class="brand-name">NetSentry</span>
+        <span class="brand-sub">IDS &amp; Monitor</span>
+      </div>
+    </div>
+
+    <!-- Navigation -->
+    <div class="sidebar-nav">
+
+      <!-- MONITORING -->
+      <div class="nav-section-title">Monitoring</div>
+      <ul class="nav flex-column">
+        <li class="nav-item">
+          <a href="{{ url_for('dashboard') }}"
+             class="nav-link {% if active_page == 'dashboard' %}active{% endif %}"
+             title="Overview" data-bs-toggle="tooltip" data-bs-placement="right">
+            <i class="bi bi-grid-1x2-fill"></i>
+            <span class="nav-label">Overview</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="{{ url_for('live_traffic') }}"
+             class="nav-link {% if active_page == 'traffic' %}active{% endif %}"
+             title="Live Traffic" data-bs-toggle="tooltip" data-bs-placement="right">
+            <i class="bi bi-activity"></i>
+            <span class="nav-label">Live Traffic</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="{{ url_for('devices') }}"
+             class="nav-link {% if active_page == 'devices' %}active{% endif %}"
+             title="Devices" data-bs-toggle="tooltip" data-bs-placement="right">
+            <i class="bi bi-hdd-network-fill"></i>
+            <span class="nav-label">Devices</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="{{ url_for('connections') }}"
+             class="nav-link {% if active_page == 'connections' %}active{% endif %}"
+             title="Connections" data-bs-toggle="tooltip" data-bs-placement="right">
+            <i class="bi bi-diagram-3-fill"></i>
+            <span class="nav-label">Connections</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="{{ url_for('investigation') }}"
+             class="nav-link {% if active_page == 'investigation' %}active{% endif %}"
+             title="Investigation" data-bs-toggle="tooltip" data-bs-placement="right">
+            <i class="bi bi-search"></i>
+            <span class="nav-label">Investigation</span>
+          </a>
+        </li>
+      </ul>
+
+      <!-- SECURITY -->
+      <div class="nav-section-title">Security</div>
+      <ul class="nav flex-column">
+        <li class="nav-item">
+          <a href="{{ url_for('alerts') }}"
+             class="nav-link {% if active_page == 'alerts' %}active{% endif %}"
+             title="Security Alerts" data-bs-toggle="tooltip" data-bs-placement="right">
+            <i class="bi bi-shield-exclamation"></i>
+            <span class="nav-label">Security Alerts</span>
+            <span class="nav-badge" id="sidebar-alert-count" style="display:none"></span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="{{ url_for('rules') }}"
+             class="nav-link {% if active_page == 'rules' %}active{% endif %}"
+             title="Detection Rules" data-bs-toggle="tooltip" data-bs-placement="right">
+            <i class="bi bi-funnel-fill"></i>
+            <span class="nav-label">Detection Rules</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="{{ url_for('incidents') }}"
+             class="nav-link {% if active_page == 'incidents' %}active{% endif %}"
+             title="Incident History" data-bs-toggle="tooltip" data-bs-placement="right">
+            <i class="bi bi-clock-history"></i>
+            <span class="nav-label">Incident History</span>
+          </a>
+        </li>
+      </ul>
+
+      <!-- ANALYSIS -->
+      <div class="nav-section-title">Analysis</div>
+      <ul class="nav flex-column">
+        <li class="nav-item">
+          <a href="{{ url_for('analytics') }}"
+             class="nav-link {% if active_page == 'analytics' %}active{% endif %}"
+             title="Analytics" data-bs-toggle="tooltip" data-bs-placement="right">
+            <i class="bi bi-bar-chart-fill"></i>
+            <span class="nav-label">Analytics</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="{{ url_for('reports') }}"
+             class="nav-link {% if active_page == 'reports' %}active{% endif %}"
+             title="Reports" data-bs-toggle="tooltip" data-bs-placement="right">
+            <i class="bi bi-file-earmark-text-fill"></i>
+            <span class="nav-label">Reports</span>
+          </a>
+        </li>
+      </ul>
+
+      <!-- SYSTEM -->
+      <div class="nav-section-title">System</div>
+      <ul class="nav flex-column">
+        <li class="nav-item">
+          <a href="{{ url_for('settings') }}"
+             class="nav-link {% if active_page == 'settings' %}active{% endif %}"
+             title="Settings" data-bs-toggle="tooltip" data-bs-placement="right">
+            <i class="bi bi-gear-fill"></i>
+            <span class="nav-label">Settings</span>
+          </a>
+        </li>
+      </ul>
+
+    </div><!-- /sidebar-nav -->
+
+    <!-- Sidebar footer version -->
+    <div class="sidebar-footer">
+      <div style="padding:0 10px;font-size:0.68rem;color:var(--text-muted);text-align:center;white-space:nowrap" class="nav-label">
+        NetSentry v1.0 · Final Year Project
+      </div>
+    </div>
+
+  </nav><!-- /sidebar -->
+
+  <!-- ===== MAIN CONTENT ===== -->
+  <div id="main-content">
+
+    <!-- TOP BAR -->
+    <header id="topbar">
+      <button id="sidebar-toggle" aria-label="Toggle sidebar">
+        <i class="bi bi-list"></i>
+      </button>
+
+      <span class="topbar-title">{% block page_title %}NetSentry{% endblock %}</span>
+
+      <!-- Global Search -->
+      <div class="topbar-search">
+        <i class="bi bi-search search-icon"></i>
+        <input type="text" id="global-search" placeholder="Search IP, domain, port…" autocomplete="off">
+        <button class="search-btn" id="global-search-btn">Go</button>
+      </div>
+
+      <!-- Status Indicators -->
+      <div class="topbar-status">
+        <span class="status-badge" title="Backend API status">
+          <span class="status-dot online" id="backend-dot"></span>
+          <span id="backend-label">Backend</span>
+        </span>
+        <span class="status-badge" title="Packet sensor status">
+          <span class="status-dot offline" id="sensor-dot"></span>
+          <span id="sensor-label">Sensor</span>
+        </span>
+        <span class="topbar-time" id="last-updated">—</span>
+        <button id="refresh-btn" title="Refresh data">
+          <i class="bi bi-arrow-clockwise"></i>
+        </button>
+      </div>
+    </header><!-- /topbar -->
+
+    <!-- PAGE CONTENT -->
+    <main id="page-content">
+      {% block content %}{% endblock %}
+    </main>
+
+  </div><!-- /main-content -->
+
+</div><!-- /app-wrapper -->
+
+<!-- Mobile overlay -->
+<div id="mobile-overlay"></div>
+
+<!-- Toast container -->
+<div id="toast-container"></div>
+
+<!-- Detail panel -->
+<div id="detail-overlay" class="detail-overlay"></div>
+<aside id="detail-panel" class="detail-panel">
+  <div class="detail-panel-header">
+    <span class="detail-panel-title" id="detail-panel-title">Details</span>
+    <button class="detail-panel-close" id="detail-panel-close"><i class="bi bi-x-lg"></i></button>
+  </div>
+  <div class="detail-panel-body" id="detail-panel-body"></div>
+</aside>
+
+<!-- Bootstrap 5 JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc4s9bIOgUxi8T/jzmrAO7E5CKqS9EbCwLHE5F7n2UH"
+        crossorigin="anonymous"></script>
+
+<!-- NetSentry shared JS -->
+<script src="{{ url_for('static', filename='js/app.js') }}"></script>
+
+<!-- Bootstrap tooltips for collapsed sidebar -->
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const tooltipEls = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+    tooltipEls.forEach(el => new bootstrap.Tooltip(el, { trigger: 'hover' }));
+
+    // Update sidebar alert badge
+    fetch('/api/alerts')
+      .then(r => r.ok ? r.json() : null)
+      .then(d => {
+        if (!d) return;
+        const critical = (d.alerts || []).filter(a => a.severity === 'CRITICAL' || a.severity === 'HIGH').length;
+        const badge = document.getElementById('sidebar-alert-count');
+        if (badge && critical > 0) { badge.textContent = critical; badge.style.display = ''; }
+      }).catch(() => {});
+  });
+</script>
+
+{% block extra_js %}{% endblock %}
+
+</body>
+</html>

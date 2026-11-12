@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+{% block title %}Reports{% endblock %}
+{% block page_title %}Reports{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1><i class="bi bi-file-earmark-text-fill text-blue" style="font-size:1.1rem"></i> Reports</h1>
+  <p class="page-subtitle">Generate downloadable PDF reports from actual NetSentry database records.</p>
+</div>
+
+<div class="row">
+  <div class="col-12 col-lg-6">
+    <div class="section-card mb-3">
+      <div class="section-card-header">
+        <span class="section-card-title"><i class="bi bi-file-earmark-pdf-fill"></i> Generate Report</span>
+      </div>
+      <div class="section-card-body">
+
+        <div class="settings-row">
+          <div class="settings-row-info">
+            <div class="settings-row-label">Report Title</div>
+            <div class="settings-row-desc">Will appear on the PDF cover</div>
+          </div>
+          <div class="settings-row-control">
+            <input type="text" class="ns-input" id="report-title" value="NetSentry Security Report" style="width:220px">
+          </div>
+        </div>
+
+        <div class="settings-row">
+          <div class="settings-row-info">
+            <div class="settings-row-label">Time Period</div>
+            <div class="settings-row-desc">Leave blank to include all historical data</div>
+          </div>
+          <div class="settings-row-control" style="display:flex;gap:6px;flex-wrap:wrap">
+            <input type="date" class="ns-input" id="report-from" style="width:140px">
+            <span class="text-muted" style="line-height:36px">to</span>
+            <input type="date" class="ns-input" id="report-to"   style="width:140px">
+          </div>
+        </div>
+
+        <div class="settings-row">
+          <div class="settings-row-info">
+            <div class="settings-row-label">Include Sections</div>
+          </div>
+          <div class="settings-row-control">
+            <div style="display:flex;flex-direction:column;gap:6px;font-size:.85rem">
+              <label><input type="checkbox" id="sec-devices"    checked> Device Inventory</label>
+              <label><input type="checkbox" id="sec-traffic"    checked> Traffic Summary</label>
+              <label><input type="checkbox" id="sec-connections" checked> Connection Summary</label>
+              <label><input type="checkbox" id="sec-alerts"     checked> Security Alerts</label>
+            </div>
+          </div>
+        </div>
+
+        <div style="margin-top:16px">
+          <button class="btn-ns btn-ns-primary w-100" id="generate-report-btn" onclick="generateReport()">
+            <i class="bi bi-download"></i> Generate &amp; Download PDF
+          </button>
+          <div id="report-status" class="text-muted text-sm mt-2" style="text-align:center"></div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <div class="col-12 col-lg-6">
+    <div class="section-card mb-3">
+      <div class="section-card-header">
+        <span class="section-card-title"><i class="bi bi-info-circle"></i> Report Contents</span>
+      </div>
+      <div class="section-card-body">
+        <div class="health-item">
+          <span class="health-label"><i class="bi bi-check-circle-fill text-green"></i> System Overview</span>
+          <span class="health-value text-muted text-xs">Always included</span>
+        </div>
+        <div class="health-item">
+          <span class="health-label"><i class="bi bi-check-circle-fill text-green"></i> Generation Date &amp; Time Period</span>
+          <span class="health-value text-muted text-xs">Always included</span>
+        </div>
+        <div class="health-item">
+          <span class="health-label"><i class="bi bi-check-circle-fill text-green"></i> Device Inventory</span>
+          <span class="health-value text-muted text-xs">Optional</span>
+        </div>
+        <div class="health-item">
+          <span class="health-label"><i class="bi bi-check-circle-fill text-green"></i> Traffic Summary &amp; Protocol Distribution</span>
+          <span class="health-value text-muted text-xs">Optional</span>
+        </div>
+        <div class="health-item">
+          <span class="health-label"><i class="bi bi-check-circle-fill text-green"></i> Network Connections</span>
+          <span class="health-value text-muted text-xs">Optional</span>
+        </div>
+        <div class="health-item">
+          <span class="health-label"><i class="bi bi-check-circle-fill text-green"></i> Security Alerts &amp; Events</span>
+          <span class="health-value text-muted text-xs">Optional</span>
+        </div>
+        <div class="health-item">
+          <span class="health-label"><i class="bi bi-check-circle-fill text-green"></i> Observations &amp; Limitations</span>
+          <span class="health-value text-muted text-xs">Always included</span>
+        </div>
+        <hr class="detail-divider">
+        <p class="text-secondary text-sm"><i class="bi bi-lock-fill"></i> Reports contain only data recorded by NetSentry. No sensitive credentials are included.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/reports.js') }}"></script>
+{% endblock %}
